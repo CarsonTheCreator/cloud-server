@@ -44,3 +44,14 @@ server.listen(port, function() {
   }
   logger.info('Server started on port: ' + port);
 });
+// === Keep-alive self ping (added for Koyeb) ===
+const http = require('http');
+setInterval(() => {
+  const url = "https://stale-erminie-carsonthecreator-5b14b5e5.koyeb.app/";
+  http.get(url, res => {
+    console.log("Self-ping:", res.statusCode);
+  }).on("error", err => {
+    console.error("Self-ping failed:", err.message);
+  });
+}, 3 * 60 * 1000); // every 3 minutes
+// === End keep-alive ===
