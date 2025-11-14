@@ -54,5 +54,5 @@ setInterval(() => {
   }).on("error", (err) => {
     console.error("Self-ping failed:", err.message);
   });
-}, 3 * 60 * 1000);
+}, 4 * 60 * 1000);
 // === End keep-alive ===
