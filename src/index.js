@@ -56,12 +56,3 @@ setInterval(async () => {
   }
 }, 1 * 60 * 1000); // 10 minutes
 //----------------------------------------------------
-🟢 IMPORTANT
-You do NOT need to import node-fetch
-Node 18+ (Render uses Node 22) already has fetch built in.
-
-So DO NOT add:
-
-js
-Copy code
-const fetch = require("node-fetch");
