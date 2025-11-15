@@ -21,7 +21,7 @@ const wss = new WebSocket.Server({
 // Ping itself every 3 minutes to prevent Render from sleeping
 setInterval(() => {
   fetch(process.env.PING_URL || "https://variablevault.onrender.com").catch(() => {});
-}, 10 * 60 * 1000); // 10 minutes
+}, 3 * 60 * 1000); // 10 minutes
 //end of chatgpt code
 
 const rooms = new RoomList();
