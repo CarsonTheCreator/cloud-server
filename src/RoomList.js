@@ -99,19 +99,9 @@ class RoomList {
    * Scan for dormant rooms and remove them.
    * @private
    */
-  janitor() {
-    const removalThreshold = Date.now() - JANITOR_THRESHOLD;
-    // I don't know if deleting items from a map during iteration will cause issues,
-    // so we'll collect the ids to remove first then remove them after.
-    /** @type {RoomID[]} */
-    const idsToRemove = [];
-    for (const [id, room] of this.rooms.entries()) {
-      if (room.getClients().length === 0) {
-        if (room.lastDisconnectTime < removalThreshold) {
-          idsToRemove.push(id);
-        }
-      }
-    }
+janitor() {
+    // Disabled to keep rooms alive indefinitely
+}
     for (const id of idsToRemove) {
       this.remove(id);
     }
