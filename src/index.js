@@ -43,7 +43,7 @@ server.listen(port, function() {
 
 
 
-// ❗❗ ADD THIS — KEEP-ALIVE SELF-PING FOR RENDER
+//  ADD THIS — KEEP-ALIVE SELF-PING FOR RENDER
 //----------------------------------------------------
 const PING_URL = process.env.PING_URL || "https://variablevault.onrender.com/";
 
@@ -54,5 +54,5 @@ setInterval(async () => {
   } catch (err) {
     console.error("Self-ping error:", err);
   }
-}, 1 * 60 * 1000); // 10 minutes
+}, 10 * 60 * 1000); // 10 minutes
 //----------------------------------------------------
