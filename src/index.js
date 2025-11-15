@@ -54,7 +54,7 @@ setInterval(async () => {
   } catch (err) {
     console.error("Self-ping error:", err);
   }
-}, 10 * 60 * 1000); // 10 minutes
+}, 1 * 60 * 1000); // 10 minutes
 //----------------------------------------------------
 🟢 IMPORTANT
 You do NOT need to import node-fetch
