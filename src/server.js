@@ -9,20 +9,13 @@ const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
 
-// Keep server awake on Render
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
 const wss = new WebSocket.Server({
   noServer: true, // we setup the server on our own
   clientTracking: false, // we do our own tracking
   maxPayload: 1024 * 1024, // 1 MB should be plenty
   perMessageDeflate: config.perMessageDeflate,
 });
-// Ping itself every 3 minutes to prevent Render from sleeping
-setInterval(() => {
-  fetch(process.env.PING_URL || "https://variablevault.onrender.com").catch(() => {});
-}, 3 * 60 * 1000); // 10 minutes
-//end of chatgpt code
+
 
 const rooms = new RoomList();
 rooms.enableLogging = true;
