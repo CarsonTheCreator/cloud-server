@@ -100,7 +100,7 @@ class RoomList {
    * @private
    */
 janitor() {
-    // Disabled to keep rooms alive indefinitely
+    // Disabled to keep rooms alive indefinitely PLEASE WORK
 }
     for (const id of idsToRemove) {
       this.remove(id);
