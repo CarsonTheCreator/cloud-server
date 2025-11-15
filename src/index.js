@@ -14,26 +14,22 @@ const server = http.createServer(function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'interest-cohort=()');
-  // @ts-ignore
   serve(req, res, finalhandler(req, res));
 });
 
 server.on('upgrade', function upgrade(request, socket, head) {
-  // Forward these requests to the WebSocket server.
   wss.handleUpgrade(request, socket, head, function done(ws) {
     wss.emit('connection', ws, request);
   });
 });
 
 server.on('close', function() {
-  // TODO: this code never seems to actually run
   logger.info('Server closing');
   wss.close();
 });
 
 const port = config.port;
 server.listen(port, function() {
-  // Update permissions of unix sockets
   if (typeof port === 'string' && port.startsWith('/') && config.unixSocketPermissions >= 0) {
     fs.chmod(port, config.unixSocketPermissions, function(err) {
       if (err) {
@@ -44,3 +40,28 @@ server.listen(port, function() {
   }
   logger.info('Server started on port: ' + port);
 });
+
+
+
+// ❗❗ ADD THIS — KEEP-ALIVE SELF-PING FOR RENDER
+//----------------------------------------------------
+const PING_URL = process.env.PING_URL || "https://variablevault.onrender.com/";
+
+setInterval(async () => {
+  try {
+    const res = await fetch(PING_URL);
+    console.log("Self-ping:", res.status);
+  } catch (err) {
+    console.error("Self-ping error:", err);
+  }
+}, 10 * 60 * 1000); // 10 minutes
+//----------------------------------------------------
+🟢 IMPORTANT
+You do NOT need to import node-fetch
+Node 18+ (Render uses Node 22) already has fetch built in.
+
+So DO NOT add:
+
+js
+Copy code
+const fetch = require("node-fetch");
