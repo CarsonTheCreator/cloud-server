@@ -2,6 +2,10 @@ const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
 
+/** Delay between janitor runs. */
+const JANITOR_INTERVAL = 1000 * 60;
+/** Time a room must be empty for before it may be removed by the janitor. */
+const JANITOR_THRESHOLD = 1000 * 60 * 60 * 24 * 14;
 /** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
 const MAX_ROOMS = 16384;
 
@@ -24,6 +28,7 @@ class RoomList {
     this.maxRooms = MAX_ROOMS;
     /** Enable or disable logging of events to the console. */
     this.enableLogging = false;
+    this.janitor = this.janitor.bind(this);
     /** @private */
     this.janitorInterval = null;
   }
@@ -45,7 +50,9 @@ class RoomList {
    */
   get(id) {
     const room = this.rooms.get(id);
-    if (!room) throw new Error('Room does not exist');
+    if (!room) {
+      throw new Error('Room does not exist');
+    }
     return room;
   }
 
@@ -57,14 +64,18 @@ class RoomList {
    */
   create(id) {
     if (this.rooms.size >= this.maxRooms) {
+      // TODO: it may be worthwhile to call janitor() and check again
       throw new ConnectionError(ConnectionError.Overloaded, `Too many rooms to fit ${id}`);
     }
-    if (this.has(id)) throw new Error('Room already exists');
-
+    if (this.has(id)) {
+      throw new Error('Room already exists');
+    }
     const room = new Room(id);
+    // It is important we update the room ID map at the end as setRoomData may throw.
     this.rooms.set(id, room);
-
-    if (this.enableLogging) logger.info('Created room: ' + id);
+    if (this.enableLogging) {
+      logger.info('Created room: ' + id);
+    }
     return room;
   }
 
@@ -79,24 +90,38 @@ class RoomList {
       throw new Error('Clients are connected to this room');
     }
     this.rooms.delete(id);
-    if (this.enableLogging) logger.info('Removed room: ' + id);
+    if (this.enableLogging) {
+      logger.info('Removed room: ' + id);
+    }
   }
 
   /**
    * Scan for dormant rooms and remove them.
-   * Disabled to keep rooms alive indefinitely.
    * @private
    */
   janitor() {
-    // Rooms will never be removed automatically
+    const removalThreshold = Date.now() - JANITOR_THRESHOLD;
+    // I don't know if deleting items from a map during iteration will cause issues,
+    // so we'll collect the ids to remove first then remove them after.
+    /** @type {RoomID[]} */
+    const idsToRemove = [];
+    for (const [id, room] of this.rooms.entries()) {
+      if (room.getClients().length === 0) {
+        if (room.lastDisconnectTime < removalThreshold) {
+          idsToRemove.push(id);
+        }
+      }
+    }
+    for (const id of idsToRemove) {
+      this.remove(id);
+    }
   }
 
   /**
    * Begin the janitor timer.
-   * Optional: you can leave this running; janitor does nothing now.
    */
   startJanitor() {
-    this.janitorInterval = setInterval(this.janitor.bind(this), 1000 * 60);
+    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL)
   }
 
   /**
@@ -104,7 +129,9 @@ class RoomList {
    * Stops the janitor timer, if it is started.
    */
   destroy() {
-    if (this.janitorInterval) clearInterval(this.janitorInterval);
+    if (this.janitorInterval) {
+      clearInterval(this.janitorInterval);
+    }
   }
 }
 
